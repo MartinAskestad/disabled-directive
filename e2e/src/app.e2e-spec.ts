@@ -8,9 +8,10 @@ describe('workspace-project App', () => {
     page = new AppPage();
   });
 
-  it('should display welcome message', () => {
+  it('should make pnr field disabled when dob is filled in', () => {
     page.navigateTo();
-    expect(page.getTitleText()).toEqual('Welcome to disabled-directive!');
+    page.getDob().sendKeys('0');
+    expect(page.getPnr().isEnabled()).toEqual(false);
   });
 
   afterEach(async () => {

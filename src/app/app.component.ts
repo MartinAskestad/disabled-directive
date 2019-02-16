@@ -38,6 +38,34 @@ import { distinctUntilChanged, map, tap } from 'rxjs/operators';
         </div>
         <div class="row">
           <div class="col">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                id="radio1"
+                [value]="'yes'"
+                formControlName="yesNo"
+                [appDisabled]="form.get('yesNo')"
+                [disable]="pnrFilled$ | async"
+              />
+              <label class="form-check-label" for="radio1">Ja</label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                id="radio2"
+                [value]="'no'"
+                formControlName="yesNo"
+              />
+              <label class="form-check-label" for="radio2">Nej</label>
+            </div>
+            <div [class.ng-invalid]="form.get('yesNo').invalid"></div>
+            <div class="invalid-feedback">Martin was here"</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
             <button
               type="submit"
               [disabled]="form.invalid"
@@ -80,7 +108,8 @@ export class AppComponent {
   constructor(fb: FormBuilder) {
     this.form = fb.group({
       pnr: fb.control('', [Validators.required]),
-      dob: fb.control('', [Validators.required])
+      dob: fb.control('', [Validators.required]),
+      yesNo: fb.control('', [Validators.required])
     });
 
     this.dobFilled$ = this.form.get('dob').valueChanges.pipe(

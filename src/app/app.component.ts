@@ -1,31 +1,96 @@
 import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   template: `
-    <!--The content below is only a placeholder and can be replaced.-->
-    <div style="text-align:center">
-      <h1>
-        Welcome to {{title}}!
-      </h1>
-      <img width="300" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-    </div>
-    <h2>Here are some links to help you start: </h2>
-    <ul>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-      </li>
-    </ul>
-    
+    <form [formGroup]="form">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4 form-group">
+            <label for="dob">Födelsedatum</label>
+            <input
+              id="dob"
+              type="text"
+              class="form-control"
+              formControlName="dob"
+              [appDisabled]="form.get('dob')"
+              [disable]="pnrFilled$ | async"
+            />
+            <div class="invalid-feedback">Du måste ange ett födelsedatum</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 form-group">
+            <label for="pnr">Personnummer</label>
+            <input
+              id="pnr"
+              type="text"
+              class="form-control"
+              formControlName="pnr"
+              [appDisabled]="form.get('pnr')"
+              [disable]="dobFilled$ | async"
+            />
+            <div class="invalid-feedback">Du måste ange ett personnummer</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <button
+              type="submit"
+              [disabled]="form.invalid"
+              class="btn btn-primary"
+            >
+              Skicka
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
   `,
-  styles: []
+  styles: [
+    `
+      .invalid-feedback {
+        display: block;
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 300ms ease-in-out;
+      }
+    `,
+    `
+      .ng-invalid + .invalid-feedback {
+        max-height: 100px;
+        transition: max-height 300ms ease-in-out;
+      }
+    `,
+    `
+      :disabled.btn-primary {
+        background-color: gray;
+        border: none;
+      }
+    `
+  ]
 })
 export class AppComponent {
-  title = 'disabled-directive';
+  form: FormGroup;
+  dobFilled$: Observable<boolean>;
+  pnrFilled$: Observable<boolean>;
+  constructor(fb: FormBuilder) {
+    this.form = fb.group({
+      pnr: fb.control('', [Validators.required]),
+      dob: fb.control('', [Validators.required])
+    });
+
+    this.dobFilled$ = this.form.get('dob').valueChanges.pipe(
+      map(value => (value ? true : false)),
+      distinctUntilChanged()
+    );
+
+    this.pnrFilled$ = this.form.get('pnr').valueChanges.pipe(
+      map(value => (value ? true : false)),
+      distinctUntilChanged()
+    );
+  }
 }
